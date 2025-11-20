@@ -1,0 +1,237 @@
+# =============================================
+# EJECUCIÓN MODO GESTIÓN MANUAL - PRÁCTICA 2
+# =============================================
+
+# =============================================
+# SECCIÓN 1: ENTRAR AL MODO GESTIÓN MANUAL
+# =============================================
+1
+
+# =============================================
+# SECCIÓN 2: CREAR CLIENTES
+# =============================================
+1
+1
+CLI001
+Carlos Rodríguez
+611222333
+carlos@taller.com
+0
+
+1
+1
+CLI002
+María García
+644555666
+maria@taller.com
+0
+
+1
+1
+CLI003
+Juan López
+677888999
+juan@taller.com
+0
+
+# =============================================
+# SECCIÓN 3: VISUALIZAR Y LISTAR CLIENTES
+# =============================================
+1
+2
+CLI001
+0
+
+1
+5
+0
+
+# =============================================
+# SECCIÓN 4: CREAR MECÁNICOS (IMPORTANTE PARA SIMULACIÓN)
+# =============================================
+4
+1
+MEC001
+Antonio
+mecánica
+8
+0
+
+4
+1
+MEC002
+Laura
+eléctrica
+6
+0
+
+4
+1
+MEC003
+Roberto
+carrocería
+10
+0
+
+# =============================================
+# SECCIÓN 5: VISUALIZAR Y LISTAR MECÁNICOS
+# =============================================
+4
+2
+MEC001
+0
+
+4
+5
+0
+
+# =============================================
+# SECCIÓN 6: CREAR INCIDENCIAS
+# =============================================
+3
+1
+INC001
+mecánica
+alta
+Cambio de embrague y discos de freno
+0
+
+3
+1
+INC002
+eléctrica
+media
+Problema en el sistema de carga de la batería
+0
+
+3
+1
+INC003
+carrocería
+baja
+Abolladura en puerta lateral derecha
+0
+
+3
+1
+INC004
+mecánica
+alta
+Fuga de aceite y revisión completa
+0
+
+# =============================================
+# SECCIÓN 7: LISTAR INCIDENCIAS
+# =============================================
+3
+5
+0
+
+# =============================================
+# SECCIÓN 8: CREAR VEHÍCULOS
+# =============================================
+2
+1
+1234ABC
+Toyota
+Corolla
+2025-01-15
+2025-01-20
+INC001
+CLI001
+0
+
+2
+1
+5678DEF
+Renault
+Clio
+2025-01-16
+2025-01-22
+INC002
+CLI002
+0
+
+2
+1
+9012GHI
+Ford
+Focus
+2025-01-17
+2025-01-25
+INC003
+CLI003
+0
+
+2
+1
+3456JKL
+Seat
+León
+2025-01-18
+2025-01-23
+INC004
+CLI001
+0
+
+# =============================================
+# SECCIÓN 9: LISTAR VEHÍCULOS
+# =============================================
+2
+5
+0
+
+# =============================================
+# SECCIÓN 10: MODIFICAR DATOS (EJEMPLOS)
+# =============================================
+1
+3
+CLI001
+Carlos Rodríguez Martín
+611444555
+carlos.martin@taller.com
+0
+
+3
+3
+INC001
+mecánica
+urgente
+Cambio completo de embrague, discos y pastillas
+0
+
+# =============================================
+# SECCIÓN 11: ASIGNAR VEHÍCULOS A PLAZAS
+# =============================================
+5
+1234ABC
+0
+
+5
+5678DEF
+0
+
+5
+9012GHI
+0
+
+# Intentar asignar uno más (debería fallar si no hay plazas)
+5
+3456JKL
+0
+
+# =============================================
+# SECCIÓN 12: VER ESTADO DEL TALLER DESDE GESTIÓN
+# =============================================
+0
+
+# =============================================
+# SECCIÓN 13: VOLVER AL MENÚ PRINCIPAL Y VER ESTADO GLOBAL
+# =============================================
+3
+0
+
+# =============================================
+# FIN - SALIR DEL PROGRAMA
+# =============================================
+0
