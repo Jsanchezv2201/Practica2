@@ -1,3 +1,5 @@
+#README TEMPORAL...
+
 # Practica 2 - **Uso de goroutines y channels de Go**
 
 ### **🎯 OBJETIVO PRINCIPAL:**
