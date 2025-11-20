@@ -1,4 +1,4 @@
-# Practica2-SistemasDistribuidos
+# Practica 2 - **Uso de goroutines y channels de Go**
 
 ### **🎯 OBJETIVO PRINCIPAL:**
 Crear un **sistema distribuido** para un taller mecánico usando **goroutines y channels de Go** (en lugar de un programa secuencial como en la práctica 1).
@@ -244,41 +244,6 @@ Gestión Manual (CRUD)         vs         Simulación Automática
 • Casos específicos                    • Escenarios estandarizados
 ```
 
-### **Ejemplo de Uso en el Código:**
-```go
-// Prueba manual con datos reales
-func TestConDatosReales() {
-    config := Configuracion{UsarDatosExistentes: true}
-    stats, _ := EjecutarSimulacion(config)
-}
-
-// Prueba automática con escenario predefinido  
-func TestEscenarioBase() {
-    config := CrearConfiguracionAutomatica(1) // Escenario base
-    stats, _ := EjecutarSimulacion(config)
-}
-```
-
-## **📊 Resultados de la Implementación Dual**
-
-### **Validación Cruzada:**
-- ✅ **Mismo motor** de concurrencia para ambos modos
-- ✅ **Idénticos mecanismos** de prioridades y contratación
-- ✅ **Consistencia** en resultados entre modos manual/automático
-- ✅ **Reutilización** de componentes core del sistema
-
-### **Para la Sección de Metodología:**
-> "El sistema implementa una arquitectura dual que combina gestión manual para casos de uso realistas con simulación automática para validación técnica. Esta aproximación permite tanto la verificación de funcionalidades específicas como el análisis comparativo de rendimiento a escala."
-
-## **🎖️ Valor Añadido**
-
-**Esta implementación demuestra:**
-- 🧠 **Visión arquitectónica** - Diseño modular y extensible
-- ⚡ **Eficiencia en desarrollo** - Herramientas para testing ágil
-- 🔄 **Flexibilidad** - Adaptable a diferentes necesidades
-- 📈 **Enfoque profesional** - Preparado para escalar y mantener
-
-**¡Incluir esta mención enriquece significativamente tu documentación y muestra una implementación más completa y profesional!** 🚀
 
 
 
@@ -414,24 +379,6 @@ go test -v -timeout=120s
 2. **Ejecutar tests relevantes** desde VS Code
 3. **Verificar que todo funciona** con la simulación automática
 
----
-
-## **📊 Qué Esperar de Cada Ejecución**
-
-### **En Simulación Automática:**
-- ✅ **Progreso visual** con mensajes de lo que está ocurriendo
-- ✅ **Métricas finales** de duración, eficiencia y contrataciones
-- ✅ **Comparativa automática** entre escenarios
-
-### **En Tests Individuales:**
-- ✅ **Output detallado** de lo que hace cada test
-- ✅ **Validaciones específicas** para cada escenario
-- ✅ **Mensajes de éxito/error** claros
-
-### **En Gestión Manual:**
-- ✅ **Menús interactivos** fáciles de usar
-- ✅ **Validación de datos** en tiempo real
-- ✅ **Feedback inmediato** de las operaciones
 
 ---
 
@@ -451,14 +398,6 @@ go test -v -timeout=120s
 - Revisar los logs que muestran el progreso paso a paso
 
 ---
-
-## **🎯 Resumen para el PDF**
-
-**"El sistema ofrece múltiples formas de interacción: gestión manual para uso realista, simulación automática para análisis rápido, y tests individuales para desarrollo. Recomiendo empezar con la simulación automática para una visión general, y luego explorar los tests específicos según el interés."**
-
-**Esta guía permite que cualquier persona, sin conocimiento previo de mi código, pueda usar y probar el sistema completa y efectivamente.** 🚀
-
-
 
 
 
@@ -523,28 +462,9 @@ type MiEnfoque struct {
 // Ganancia: 90% de tiempo ahorrado
 ```
 
-### **🔬 Calidad de Análisis**
-"Al tener resultados consistentes y reproducibles, pude:
-- Identificar patrones reales en el comportamiento del sistema
-- Detectar el escenario óptimo (Doble Plantilla) con datos concretos
-- Validar que el sistema de prioridades funcionaba correctamente
-- Demostrar la escalabilidad del sistema con métricas precisas"
-
 ### **🐛 Detección de Errores**
-"La simulación automática me ayudó a encontrar y corregir varios bugs que hubieran pasado desapercibidos con pruebas manuales, como el problema de configuración en el Escenario 3."
+"La simulación automática me ayudó a encontrar y corregir varios bugs que hubieran pasado desapercibidos con pruebas manuales."
 
-## **Mi Reflexión Final**
-
-**"Implementé el módulo de simulación no porque fuera un requisito, sino porque como desarrollador entendí que necesitaba herramientas eficientes para validar mi trabajo. Esta decisión me permitió:**
-
-1. **Entender mejor** mi propio código al verlo funcionar en múltiples escenarios
-2. **Demostrar científicamente** que la implementación concurrente funcionaba correctamente  
-3. **Ahorrar tiempo** para focus en el análisis en lugar de la preparación
-4. **Crear un sistema** más robusto al probarlo exhaustivamente
-
-**Incluyo esta funcionalidad en el PDF porque representa no solo lo que implementé, sino cómo pensé como ingeniero para resolver problemas reales de desarrollo."**
-
-Esta aproximación muestra tu capacidad para ir beyond los requisitos básicos y desarrollar herramientas que mejoran significativamente la calidad y eficiencia del proceso de desarrollo. ¡Es un plus importante en cualquier proyecto! 🚀
 
 
 # 1. Explicación del Diseño del Sistema
@@ -637,85 +557,3 @@ type Cola struct {
 
 ---
 
-## 🔄 **Arquitectura del Sistema**
-
-### **Diagrama de Relaciones entre Componentes**
-```
-Taller (1) ────── (N) Mecánico (1) ─── (1) ChanTrabajo
-  │                                       │
-  ├── (1) Cola ─── (N) Coche             │
-  │         │                            │
-  └── (1) Estadísticas                   │
-                                        │
-Coche (1) ──────────────────────────────┘
-```
-
-### **Flujo de Datos Principal**
-1. **Entrada**: Coches llegan al taller y se encolan
-2. **Coordinación**: El coordinator asigna coches a mecánicos disponibles
-3. **Procesamiento**: Mecánicos atienden coches concurrentemente
-4. **Priorización**: Coches >15s activan mecanismos de emergencia
-5. **Escalado**: Contratación automática bajo demanda
-6. **Salida**: Registro de métricas y finalización ordenada
-
----
-
-## ⚙️ **Funciones Principales**
-
-### **Gestión del Ciclo de Vida**
-```go
-func (t *Taller) Iniciar()           // Lanza todas las goroutines
-func (t *Taller) Detener()           // Cierre graceful del sistema
-func (m *Mecanico) Iniciar(taller *Taller)  // Goroutine del worker
-```
-
-### **Gestión de Concurrencia**
-```go
-func (c *Cola) AgregarCoche(coche *Coche)   // Thread-safe con mutex
-func (c *Cola) ObtenerCoche() *Coche        // Bloqueante con notify
-func (t *Taller) coordinator()              // Goroutine principal
-```
-
-### **Mecanismos de Emergencia**
-```go
-func (t *Taller) atiendeCochePrioritario(coche *Coche)
-func (t *Taller) buscarMecanicoLibreCualquierEspecialidad() *Mecanico
-```
-
----
-
-## 🎯 **Patrones de Diseño Implementados**
-
-### **1. Worker Pool Pattern**
-- Cada mecánico es un worker especializado
-- Channels como mecanismo de distribución de trabajo
-- Balanceo automático de carga
-
-### **2. Observer Pattern**
-- Cola notifica al coordinator de nuevos elementos
-- Evita polling activo y mejora eficiencia
-
-### **3. Producer-Consumer Pattern**
-- Coordinator produce asignaciones
-- Mecánicos consumen y procesan trabajos
-
-### **4. Graceful Shutdown Pattern**
-- Cierre ordenado de todas las goroutines
-- Liberación segura de recursos
-
----
-
-## 🔗 **Comunicación entre Componentes**
-
-### **Channels como Mecanismo Principal**
-- **ChanTrabajo**: Comunicación 1-a-1 coordinator-mecánico
-- **notify**: Notificaciones 1-a-1 cola-coordinator  
-- **ChanDetener**: Señalización broadcast de parada
-
-### **Sincronización con Mutex**
-- Protección de estructuras compartidas (cola)
-- Garantía de consistencia en acceso concurrente
-
----
-
-**Esta explicación del diseño, combinada con los diagramas de secuencia UML proporcionados anteriormente, forma una documentación completa que cumple con el 40% del requisito, mostrando claramente la arquitectura, estructuras de datos y funcionamiento del sistema concurrente.**
