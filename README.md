@@ -206,7 +206,7 @@ go test -v -run TestEscenario1_ConfiguracionBase
 
 ---
 
-## 📈 Resultados de Performance
+## 📈 Resultados de los Tests
 
 ### 🏆 Comparativa de Escenarios
 
@@ -218,25 +218,6 @@ go test -v -run TestEscenario1_ConfiguracionBase
 | **3M-1E-1C** | 36.49s | +0.1% | 0 | 1 |
 | **1M-3E-3C** | 32.43s | -11% | 0 | 0 |
 
-### 🎯 Análisis Detallado
-
-#### **📊 Caso Base vs Doble Carga**
-```go
-// Demanda: +100% vehículos (8 → 16)
-// Rendimiento: Solo +9% de tiempo adicional
-// Adaptabilidad: 8 contrataciones automáticas
-```
-
-**Conclusión:** ✅ El sistema maneja carga duplicada con impacto temporal mínimo, demostrando excelente escalabilidad.
-
-#### **📊 Caso Base vs Doble Plantilla**
-```go  
-// Velocidad: +70% más rápido (20.92s vs 36.44s)
-// Estabilidad: Eliminación total de congestiones
-// Eficiencia: Cero contrataciones extra necesarias
-```
-
-**Conclusión:** ✅ Duplicar la plantilla reduce tiempo en 43% y elimina completamente los cuellos de botella.
 
 ### 🏅 Ranking de Eficiencia
 
