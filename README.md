@@ -1,470 +1,97 @@
-# README TEMPORAL...
-
-# Practica 2 - **Uso de goroutines y channels de Go**
-
-### **🎯 OBJETIVO PRINCIPAL:**
-Crear un **sistema distribuido** para un taller mecánico usando **goroutines y channels de Go** (en lugar de un programa secuencial como en la práctica 1).
-
-
-### **⚙️ FUNCIONALIDADES REQUERIDAS:**
-
-**1. Atención por Mecánicos Especializados:**
-- **Mecánica:** 5 segundos de atención
-- **Eléctrica:** 7 segundos  
-- **Carrocería:** 11 segundos
-
-**2. Sistema de Cola:**
-- Cola de espera **sin límite de tamaño**
-- Los coches esperan si no hay mecánicos libres
-
-**3. Sistema de Prioridad:**
-- Si un coche acumula **más de 15 segundos** de atención
-- Se le asigna **otro mecánico** adicional
-- Si no hay mecánicos, se **contrata uno nuevo**
-
-### **🛠️ RESTRICCIONES TÉCNICAS:**
-- Usar **solo goroutines y channels** (como se vio en clase)
-- Se pueden usar **múltiples archivos .go**
-- **NO** es necesario guardar datos (sin persistencia)
+# 🚗 Práctica 2 - Taller de Coches en GO
 
 ---
 
+## 📋 Descripción del Proyecto
 
+Implementación de un **sistema distribuido para taller mecánico** utilizando **goroutines y channels de Go**, donde se simula la atención concurrente de vehículos por mecánicos especializados con gestión automática de prioridades y contratación bajo demanda.
 
-
-## 🔄 **Explicación de la Implementación de Goroutines y Channels**
-
-### **1. Estructura General del Sistema Concurrente**
-
-```
-Taller (Main)
-    │
-    ├── Coordinator (Goroutine) ← Gestiona cola y prioridades
-    │
-    ├── Mecánico 1 (Goroutine) ← Atiende coches
-    ├── Mecánico 2 (Goroutine) ← Atiende coches  
-    ├── Mecánico 3 (Goroutine) ← Atiende coches
-    └── ...
-```
-
-### **2. Goroutines Implementadas**
-
-**A) Goroutine del Coordinator:**
-```go
-// En taller.go
-func (t *Taller) coordinator() {
-    for t.running {
-        coche := t.Cola.ObtenerCoche()
-        if coche == nil { return }
-        // Lógica de asignación...
-    }
-}
-```
-
-**B) Goroutines de los Mecánicos:**
-```go
-// En mecanico.go  
-func (m *Mecanico) Iniciar(taller *Taller) {
-    go func() {
-        for coche := range m.ChanTrabajo {
-            // Procesar coche...
-            tiempoAtencion := coche.TiempoAtencion()
-            time.Sleep(tiempoAtencion)
-            // Registrar finalización...
-        }
-    }()
-}
-```
-
-**C) Goroutines Auxiliares para Re-encolado:**
-```go
-// En atiendeCocheNormal()
-go func(c *Coche) {
-    time.Sleep(waitTime)
-    if t.running {
-        t.Cola.AgregarCoche(c)
-    }
-}(coche)
-```
-
-### **3. Channels Implementados**
-
-**A) Channel de Trabajo por Mecánico:**
-```go
-type Mecanico struct {
-    ChanTrabajo chan *Coche  // Channel buffered (tamaño 1)
-}
-
-// Uso: Asignar coche a mecánico
-mecanico.ChanTrabajo <- coche
-```
-
-**B) Channel de Notificación de Cola:**
-```go
-type Cola struct {
-    notify chan struct{}  // Channel para notificar nuevos elementos
-}
-
-// Uso: Notificar cuando hay coche nuevo
-select {
-case c.notify <- struct{}{}:
-default: // Evita bloqueo si ya hay notificación
-}
-```
-
-**C) Channel de Control de Parada:**
-```go
-type Taller struct {
-    ChanDetener chan bool  // Para señalizar parada
-}
-```
-
-### **4. Patrones de Comunicación**
-
-**Flujo Normal:**
-```
-Coordinator → [Channel ChanTrabajo] → Mecánico (Goroutine)
-     ↑
-  Cola con notify channel
-```
-
-**Flujo con Prioridad:**
-```
-Coche prioritario → Coordinator → Contratar nuevo mecánico → Nuevo Channel
-```
-
-### **5. Sincronización y Control**
-
-**Inicio del Sistema:**
-```go
-func (t *Taller) Iniciar() {
-    go t.coordinator()  // Lanzar goroutine coordinador
-    for _, m := range t.Mecanicos {
-        m.Iniciar(t)    // Lanzar goroutine por cada mecánico
-    }
-}
-```
-
-**Parada Controlada:**
-```go
-func (t *Taller) Detener() {
-    t.running = false
-    t.Cola.Cerrar()           // Cerrar cola primero
-    close(t.ChanDetener)      // Señalizar parada
-    for _, m := range t.Mecanicos {
-        m.Detener()           // Cerrar channels de mecánicos
-    }
-}
-```
-
-### **6. Gestión de Concurrencia en la Cola**
-
-```go
-func (c *Cola) ObtenerCoche() *Coche {
-    for {
-        c.mutex.Lock()
-        if len(c.coches) > 0 {
-            coche := c.coches[0]
-            c.coches = c.coches[1:]
-            c.mutex.Unlock()
-            return coche
-        }
-        c.mutex.Unlock()
-        <-c.notify  // Espera bloqueante hasta notificación
-    }
-}
-```
-
-# 🚀 **Guía Completa de Uso del Sistema de Taller Mecánico**
-
-## **📋 Descripción General del Sistema**
-
-He desarrollado un **sistema dual** que combina:
-
-### **1. 🖱️ Gestión Manual (CRUD)**
-**Igual que en la Práctica 1** - Sistema completo de gestión manual
-
-### **2. ⚡ Simulación Automática**  
-**Nueva funcionalidad** - Para pruebas rápidas y comparativas
-
-### **3. 🧪 Tests Automatizados**
-**Validación exhaustiva** - Verificación del sistema concurrente
+### 🎯 Objetivos Principales
+- Implementar concurrencia usando **goroutines y channels**
+- Gestionar **colas de espera ilimitadas** con notificaciones eficientes
+- Implementar **sistema de prioridades** para coches con esperas prolongadas
+- Realizar **análisis comparativo** de diferentes configuraciones del sistema
 
 ---
 
-## **🎮 Cómo Usar el Sistema - Paso a Paso**
+## ⚙️ Funcionalidades Implementadas
 
-### **OPCIÓN 1: Gestión Manual (Modo Interactivo)**
+### 🔧 Sistema de Atención por Especialidad
+| Especialidad | ⏱️ Tiempo Atención |
+|-------------|-------------------|
+| **Mecánica** | 5 segundos | 
+| **Eléctrica** | 7 segundos | 
+| **Carrocería** | 11 segundos |
 
-#### **Pasos:**
-1. **Ejecutar el programa:**
-   ```bash
-   go run main.go
-   ```
+### 📊 Gestión Inteligente de Colas
+- 🚗 Cola de espera **sin límite de tamaño**
+- 🔔 Notificaciones **no bloqueantes** mediante channels  
+- ⚡ **Detección automática** de coches prioritarios (>15 segundos de espera)
 
-2. **Seleccionar opción 1: "Gestión Manual"**
-   ```
-   === TALLER MECÁNICO - PRÁCTICA 2 ===
-   1. Gestión Manual (Clientes, Vehículos, Incidencias, Mecánicos)
-   2. Ejecutar Simulación Automática
-   3. Simulación con Datos Actuales
-   4. Estado Actual del Taller
-   5. Ejecutar Tests
-   0. Salir
-   ```
-
-3. **Navegar por los submenús:**
-   - **Clientes**: Crear, visualizar, modificar, eliminar
-   - **Vehículos**: Gestionar vehículos y asociar incidencias
-   - **Incidencias**: Gestionar problemas con tipo y prioridad
-   - **Mecánicos**: Gestionar especialistas y sus plazas
-
-#### **Cuándo usar este modo:**
-- ✅ Para probar funcionalidades específicas
-- ✅ Cuando quieres simular uso real del sistema
-- ✅ Para verificar la integración entre módulos
+### 🚨 Sistema de Emergencia
+- 👷 **Contratación automática** de mecánicos cuando sea necesario
+- 🎯 **Reasignación prioritaria** para coches con esperas prolongadas
+- ⚖️ **Balanceo dinámico** de carga entre especialistas
 
 ---
 
-### **OPCIÓN 2: Simulación Automática (Recomendado para pruebas)**
+## 🔄 Diagramas de Secuencia UML
 
-#### **Pasos:**
-1. **Ejecutar el programa:**
-   ```bash
-   go run main.go
-   ```
-
-2. **Seleccionar opción 2: "Ejecutar Simulación Automática"**
-   - El sistema ejecutará **automáticamente 5 escenarios predefinidos**
-   - No requiere ninguna entrada manual
-   - Genera métricas completas de rendimiento
-
-#### **Los 5 escenarios que se prueban:**
-1. **Configuración Base** (3 mecánicos, 8 coches)
-2. **Doble Carga** (3 mecánicos, 16 coches) 
-3. **Doble Plantilla** (6 mecánicos, 8 coches)
-4. **Distribución 3M-1E-1C** (5 mecánicos especializados)
-5. **Distribución 1M-3E-3C** (7 mecánicos especializados)
-
-#### **Cuándo usar este modo:**
-- ✅ Para ver el rendimiento del sistema completo
-- ✅ Para comparar diferentes configuraciones
-- ✅ Para obtener métricas de forma rápida
+#### **1. Llegada y Atención de Coche Normal**
+![Llegada y Atención de Coche Normal](diagramas/llegada_atencion_coche.png)
 
 ---
 
-### **OPCIÓN 3: Tests Individuales (Para desarrolladores)**
-
-#### **Método A: Desde VS Code (Más fácil)**
-1. **Abrir el archivo `taller_test.go`**
-2. **Buscar las funciones de test** (cada escenario tiene su propia función)
-3. **Hacer clic en el icono "Run Test"** ▶️ que aparece arriba de cada función
-
-**Ejemplo:**
-```go
-// Buscar esta función y hacer clic en "Run Test" arriba de ella:
-func TestEscenario1_ConfiguracionBase(t *testing.T) {
-    // Este test ejecuta solo el escenario base
-}
-
-func TestEscenario2_DobleCoches(t *testing.T) {
-    // Este test ejecuta solo el escenario de doble carga
-}
-```
-
-#### **Método B: Desde Terminal**
-```bash
-# Ejecutar TODOS los tests
-go test -v
-
-# Ejecutar UN test específico
-go test -v -run TestEscenario1_ConfiguracionBase
-
-# Ejecutar tests con timeout extendido
-go test -v -timeout=120s
-```
-
-#### **Tests disponibles en `taller_test.go`:**
-- `TestEscenario1_ConfiguracionBase`
-- `TestEscenario2_DobleCoches` 
-- `TestEscenario3_DobleMecanicos`
-- `TestEscenario4_Mecanicos3Mecanica`
-- `TestEscenario5_Mecanicos1Mecanica3Electricos3Carroceria`
-- `TestFuncionalidadesClave`
-- `TestRendimiento`
+#### **2. Gestión de la Cola de Espera**  
+![Gestión de la Cola de Espera](diagramas/gestion_cola_de_espera.png)
 
 ---
 
-## **🔄 Flujo Recomendado para Nuevos Usuarios**
-
-### **Para entender el sistema:**
-1. **Primero**: Ejecutar **Opción 2** (Simulación Automática) para ver el sistema en acción
-2. **Luego**: Probar **Opción 1** (Gestión Manual) para entender las funcionalidades
-3. **Finalmente**: Ejecutar **tests individuales** para verificar componentes específicos
-
-### **Para desarrolladores:**
-1. **Modificar el código**
-2. **Ejecutar tests relevantes** desde VS Code
-3. **Verificar que todo funciona** con la simulación automática
-
+#### **3. Atención Prioritaria y Contratación**
+![Atención Prioritaria y Contratación](diagramas/atencion_prioritaria_contatacion.png)
 
 ---
 
-## **🚨 Solución de Problemas Comunes**
-
-### **Si los tests fallan:**
-- Verificar que todos los archivos `.go` estén en la misma carpeta
-- Ejecutar `go mod tidy` para resolver dependencias
-- Asegurarse de usar Go version 1.16 o superior
-
-### **Si la simulación se cuelga:**
-- Los tests tienen timeout de 120 segundos
-- Si excede este tiempo, revisar posibles bucles infinitos
-
-### **Para obtener más detalles:**
-- Ejecutar con `-v` para output verbose
-- Revisar los logs que muestran el progreso paso a paso
+#### **4. Simulación Completa**
+![Simulación Completa](diagramas/simulacion_completa.png)
 
 ---
-
-
-
-# 🚀 **Implementación del Módulo de Simulación Automática - Mi Enfoque Personal**
-
-## **¿Por qué desarrollé `simulacion.go`?**
-
-**Como desarrollador, me di cuenta de que necesitaba una forma más eficiente de probar el sistema.** Durante las primeras pruebas manuales, perdía mucho tiempo creando clientes, vehículos y mecánicos uno por uno. Esto me impedía:
-
-### **Problemas que identificé:**
-```go
-// Antes - Pruebas manuales lentas:
-1. ⏳ 5-10 minutos por prueba creando datos
-2. 🔄 Dificultad para reproducir exactamente los mismos escenarios  
-3. 📊 Imposibilidad de comparar configuraciones de forma justa
-4. 🧪 Complejidad para probar casos extremos de forma consistente
-```
-
-### **Mi solución: `simulacion.go`**
-```go
-// Decidí crear un sistema que me permitiera:
-func PorqueLoSimplemente() {
-    // 1. 🔁 Ejecutar pruebas en segundos, no en minutos
-    // 2. 📈 Comparar múltiples escenarios rápidamente  
-    // 3. 🎯 Reproducir exactamente las mismas condiciones
-    // 4. 🧪 Probar casos límite de forma sistemática
-}
-```
-
-## **Mi Proceso de Desarrollo**
-
-### **Fase 1: Necesidad Identificada**
-"Después de probar manualmente el sistema 2-3 veces, me di cuenta de que estaba gastando más tiempo configurando datos que analizando resultados. Necesitaba una forma de automatizar este proceso."
-
-### **Fase 2: Diseño del Módulo**
-```go
-// Pensé: "¿Qué necesito para probar realmente el sistema concurrente?"
-type MiEnfoque struct {
-    ConfiguracionesPredefinidas []Escenario
-    ModoAutomatico              bool
-    MetricasAutomaticas         bool
-}
-
-// Escogí 5 escenarios que representaran casos reales:
-// 1. Caso base - Línea de referencia
-// 2. Doble carga - Test de estrés  
-// 3. Doble plantilla - Test de recursos
-// 4. Distribución 3-1-1 - Test de especialización
-// 5. Distribución 1-3-3 - Test de balance extremo
-```
-
-### **Fase 3: Implementación**
-"Implementé `CrearConfiguracionAutomatica()` para que, con un simple número de escenario, pudiera generar toda la configuración necesaria. Esto me permitió ejecutar los 5 tests en menos de 3 minutos, en lugar de 30+ minutos manualmente."
-
-## **Beneficios que Obtuve Personalmente**
-
-### **🕒 Eficiencia de Tiempo**
-```go
-// ANTES: ~30 minutos para 5 pruebas manuales
-// DESPUÉS: ~3 minutos para 5 pruebas automáticas
-
-// Ganancia: 90% de tiempo ahorrado
-```
-
-### **🐛 Detección de Errores**
-"La simulación automática me ayudó a encontrar y corregir varios bugs que hubieran pasado desapercibidos con pruebas manuales."
-
-
-
-# 1. Explicación del Diseño del Sistema
 
 ## 📋 **Estructuras de Datos Principales**
 
 ### 🚗 **Coche**
 ```go
 type Coche struct {
-    Matricula     string 
-    ID            string 
-    TipoIncidencia TipoIncidencia 
-    TiempoAtendido time.Duration 
-    ChanTerminado chan bool 
-    TiempoLlegada time.Time 
+    Matricula     string
+    ID            string
+    TipoIncidencia TipoIncidencia
+    TiempoAtendido time.Duration
+    ChanTerminado chan bool
+    TiempoLlegada time.Time
 }
 ```
-
-**Propósito:** Representa cada vehículo que llega al taller con su incidencia específica.
-
-**Campos clave:**
-- `TipoIncidencia`: Determina la especialidad requerida y tiempo de reparación
-- `TiempoAtendido`: Acumula el tiempo total de atención para control de prioridades
-- `ChanTerminado`: Permite sincronizar la finalización entre goroutines
-- `TiempoLlegada`: Timestamp para medición de tiempos reales
-
----
 
 ### 🔧 **Mecánico**
 ```go
 type Mecanico struct {
     ID           string
     Especialidad TipoIncidencia
-    Ocupado      bool
     ChanTrabajo  chan *Coche
     Trabajando   bool
     taller       *Taller
 }
 ```
 
-**Propósito:** Cada mecánico es una goroutine independiente que procesa coches concurrentemente.
-
-**Campos clave:**
-- `Especialidad`: Define qué tipo de incidencias puede atender
-- `ChanTrabajo`: Channel personalizado para recibir trabajos (patrón worker)
-- `Ocupado`/`Trabajando`: Estados para gestión de concurrencia
-- `taller`: Referencia al sistema principal para comunicación bidireccional
-
----
-
 ### 🏢 **Taller**
 ```go
 type Taller struct {
-    Cola               *Cola
-    Mecanicos          []*Mecanico
-    ChanDetener        chan bool
-    Stats              *Estadisticas
-    running            bool
-    mensajesBuffer     []string
+    Cola        *Cola
+    Mecanicos   []*Mecanico
+    ChanDetener chan bool
+    Stats       *Estadisticas
+    running     bool
 }
 ```
-
-**Propósito:** Coordina todas las operaciones del sistema y gestiona el estado global.
-
-**Campos clave:**
-- `Cola`: Centraliza la gestión de coches pendientes
-- `Mecanicos`: Pool de workers especializados
-- `ChanDetener`: Controla el cierre graceful del sistema
-- `Stats`: Recopila métricas para análisis comparativo
-- `running`: Flag atómico para control de ciclo de vida
-
----
 
 ### 📋 **Cola de Espera**
 ```go
@@ -475,13 +102,243 @@ type Cola struct {
     notify   chan struct{}
 }
 ```
+---
 
-**Propósito:** Gestiona la cola de espera de forma thread-safe con notificaciones eficientes.
+## ⚙️ **Funciones Principales**
 
-**Campos clave:**
-- `mutex`: Garantiza acceso seguro desde múltiples goroutines
-- `notify`: Implementa el patrón observer para notificaciones no-bloqueantes
-- `cerrada`: Permite un cierre ordenado sin race conditions
+### **Gestión del Ciclo de Vida**
+```go
+func (t *Taller) Iniciar()           // Lanza todas las goroutines
+func (t *Taller) Detener()           // Cierre graceful del sistema
+func (m *Mecanico) Iniciar(taller *Taller)  // Goroutine del worker
+```
+
+### **Gestión de Concurrencia**
+```go
+func (c *Cola) AgregarCoche(coche *Coche)   // Thread-safe con mutex
+func (c *Cola) ObtenerCoche() *Coche        // Bloqueante con notify
+func (t *Taller) coordinator()              // Goroutine principal
+```
+
+### **Mecanismos de Emergencia**
+```go
+func (t *Taller) atiendeCochePrioritario(coche *Coche)
+func (t *Taller) buscarMecanicoLibreCualquierEspecialidad() *Mecanico
+```
 
 ---
+
+### 📡 Channels de Comunicación
+
+| Channel | 🎯 Tipo | 📝 Propósito | 
+|---------|---------|--------------|
+| `ChanTrabajo` | `chan *Coche` | Asignación de trabajos | 
+| `notify` | `chan struct{}` | Notificaciones de nueva cola | 
+| `ChanDetener` | `chan bool` | Control de parada del sistema | 
+| `ChanTerminado` | `chan bool` | Sincronización de finalización | 
+
+---
+
+## 🚀 Guía de Ejecución
+
+---
+
+### 🎮 Menú Principal
+
+```
+=== TALLER MECÁNICO - PRÁCTICA 2 ===
+1. Gestión Manual (Clientes, Vehículos, Incidencias, Mecánicos)
+2. Ejecutar Simulación Automática
+3. Simulación con Datos Actuales  
+4. Estado Actual del Taller
+5. Ejecutar Tests
+0. Salir
+```
+---
+## 📊 Modos de Operación
+
+### **1. 🖱️ Gestión Manual** (20-30 minutos)
+- 👥 Gestión completa de clientes, vehículos e incidencias
+- 🔧 Configuración personalizada de mecánicos  
+- 🎯 Simulación con datos reales creados por el usuario
+
+### **2. ⚡ Simulación Automática** (40 segundos/escenario)
+- 🤖 Ejecución automática de **5 escenarios predefinidos**
+- 📈 Generación de métricas completas de rendimiento
+- 🚫 Sin intervención manual requerida
+
+### **3. 🧪 Tests Individuales**
+#### **Método A: Desde VS Code (Más fácil)**
+1. **Abrir el archivo `taller_test.go`**
+2. **Buscar las funciones de test** (cada escenario tiene su propia función)
+3. **Hacer clic en el icono "Run Test"** ▶️ que aparece arriba de cada función
+
+**Ejemplo:**
+
+
+#### **Método B: Desde Terminal**
+```bash
+# Ejecutar TODOS los tests
+go test -v
+
+# Ejecutar UN test específico
+go test -v -run TestEscenario1_ConfiguracionBase
+```
+
+#### **Tests disponibles en `taller_test.go`:**
+- `TestEscenario1_ConfiguracionBase`
+- `TestEscenario2_DobleCoches` 
+- `TestEscenario3_DobleMecanicos`
+- `TestEscenario4_Mecanicos3Mecanica`
+- `TestEscenario5_Mecanicos1Mecanica3Electricos3Carroceria`
+
+---
+
+## 🧪 Escenarios de Prueba
+
+| Escenario | 🎯 Configuración | 🚗 Coches | 👷 Mecánicos | 📝 Descripción |
+|-----------|-----------------|-----------|-------------|---------------|
+| **Caso Base** | 1M/1E/1C | 8 | 3 | Configuración mínima funcional |
+| **Doble Carga** | 1M/1E/1C | 16 | 3 | Test de estrés del sistema |
+| **Doble Plantilla** | 2M/2E/2C | 8 | 6 | Test de recursos adicionales |
+| **3M-1E-1C** | 3M/1E/1C | 8 | 5 | Especialización en mecánica |
+| **1M-3E-3C** | 1M/3E/3C | 8 | 7 | Especialización en eléctrica/carrocería |
+
+---
+
+## 📈 Resultados de Performance
+
+### 🏆 Comparativa de Escenarios
+
+| Escenario | ⏱️ Duración | 📊 % vs Base | 👷 Mecánicos Extra | 🚨 Coches Prioritarios |
+|-----------|-------------|-------------|-------------------|----------------------|
+| **Caso Base** | 36.44s | - | 2 | 4 |
+| **Doble Carga** | 39.67s | +9% | 8 | 15 |
+| **Doble Plantilla** | 20.92s | -43% | 0 | 0 |
+| **3M-1E-1C** | 36.49s | +0.1% | 0 | 1 |
+| **1M-3E-3C** | 32.43s | -11% | 0 | 0 |
+
+### 🎯 Análisis Detallado
+
+#### **📊 Caso Base vs Doble Carga**
+```go
+// Demanda: +100% vehículos (8 → 16)
+// Rendimiento: Solo +9% de tiempo adicional
+// Adaptabilidad: 8 contrataciones automáticas
+```
+
+**Conclusión:** ✅ El sistema maneja carga duplicada con impacto temporal mínimo, demostrando excelente escalabilidad.
+
+#### **📊 Caso Base vs Doble Plantilla**
+```go  
+// Velocidad: +70% más rápido (20.92s vs 36.44s)
+// Estabilidad: Eliminación total de congestiones
+// Eficiencia: Cero contrataciones extra necesarias
+```
+
+**Conclusión:** ✅ Duplicar la plantilla reduce tiempo en 43% y elimina completamente los cuellos de botella.
+
+### 🏅 Ranking de Eficiencia
+
+| Posición | 🥇 Escenario | 🎯 Justificación | 
+|----------|-------------|-----------------|--------------|
+| **1** | **Doble Plantilla** | Más rápido + cero prioridades + cero contrataciones | 
+| **2** | **1M-3E-3C** | Balance perfecto: rápido + cero congestiones | 
+| **3** | **3M-1E-1C** | Similar tiempo al base pero mejor gestión | 
+| **4** | **Caso Base** | Configuración mínima funcional | 
+| **5** | **Doble Carga** | Estrés máximo del sistema | 
+
+---
+
+## 🔍 Análisis Técnico
+
+### 🔄 Goroutines Implementadas
+
+#### **Coordinador Principal**
+```go
+func (t *Taller) coordinator() {
+    for t.running {
+        coche := t.Cola.ObtenerCoche()
+        if coche == nil { return }
+        // Lógica de asignación y prioridades
+    }
+}
+```
+
+#### **Workers Especializados**
+```go
+func (m *Mecanico) Iniciar(taller *Taller) {
+    go func() {
+        for coche := range m.ChanTrabajo {
+            tiempo := coche.TiempoAtencion()
+            time.Sleep(tiempo)
+            // Registrar finalización
+        }
+    }()
+}
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+practica2-taller-coches/
+├── 📂 .vscode/
+│   ├── settings.json
+├── 📂 crud/                 # Gestión manual P1 (CRUD)
+│   ├── clientes.go
+│   ├── gestion.go
+│   ├── incidencias.go
+│   ├── mecanicos.go
+│   └── vehiculos.go
+├── 📂 taller/               # Núcleo del sistema 
+│   ├── coche.go
+│   ├── cola.go
+│   ├── mecanico.go
+│   ├── simulacion.go
+│   ├── taller.go
+│   └── taller_test.go
+├── 📂 diagramas/            # Diagramas de secuencia del sistema
+│   ├── atencion_prioritaria_contatacion.png
+│   ├── gestion_cola_de_espera.png
+│   ├── llegada_atencion_coche.png
+│   └── simulacion_completa.png
+├── 📄 main.go              # Punto de entrada
+├── 📄 taller_test.go
+├── 📄 P2-DISTRIBUIDOS.pdf  # Memoria PDF entregable
+├── 📄 go.mod
+└── 📄 README.md
+```
+
+---
+
+## 🎯 Conclusiones
+
+### ✅ Logros Principales
+- **Sistema completamente concurrente** usando goroutines y channels
+- **Gestión automática de prioridades** con contratación bajo demanda
+- **Mecanismos de sincronización** robustos y libres de race conditions
+- **Análisis comparativo exhaustivo** de diferentes configuraciones
+
+### 🚀 Aportaciones Técnicas
+- **Sistema de métricas integrado** para análisis de rendimiento
+- **Múltiples modos de operación** que cubren desde desarrollo hasta producción
+- **Tests automatizados** que validan tanto funcionalidad como rendimiento
+
+---
+
+## 🔗 Enlaces
+
+- **📚 Documentación Completa**: [PDF de la Práctica](P2-DISTRIBUIDOS.pdf)
+- **📋 Enunciado Original**: [2_practica_ssdd_dist.pdf](2_practica_ssdd_dist.pdf)
+
+---
+
+## 👨‍💻 Autor
+
+**Juan Sánchez Vinuesa**  
+Ingeniería en Telemática  
+Sistemas Distribuidos - GIT - URJC  
+Curso 2025/2026
 
