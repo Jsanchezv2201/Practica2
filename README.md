@@ -171,10 +171,7 @@ func (t *Taller) buscarMecanicoLibreCualquierEspecialidad() *Mecanico
 #### **Método A: Desde VS Code (Más fácil)**
 1. **Abrir el archivo `taller_test.go`**
 2. **Buscar las funciones de test** (cada escenario tiene su propia función)
-3. **Hacer clic en el icono "Run Test"** ▶️ que aparece arriba de cada función
-
-**Ejemplo:**
-
+3. **Hacer clic en el icono "Run Test"** ▶️ que aparece a la izquierda de cada función
 
 #### **Método B: Desde Terminal**
 ```bash
