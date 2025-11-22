@@ -219,7 +219,7 @@ go test -v -run TestEscenario1_ConfiguracionBase
 ### 🏅 Ranking de Eficiencia
 
 | Posición | 🥇 Escenario | 🎯 Justificación | 
-|----------|-------------|-----------------|--------------|
+|----------|-------------|-----------------|
 | **1** | **Doble Plantilla** | Más rápido + cero prioridades + cero contrataciones | 
 | **2** | **1M-3E-3C** | Balance perfecto: rápido + cero congestiones | 
 | **3** | **3M-1E-1C** | Similar tiempo al base pero mejor gestión | 
@@ -288,21 +288,6 @@ practica2-taller-coches/
 ├── 📄 go.mod
 └── 📄 README.md
 ```
-
----
-
-## 🎯 Conclusiones
-
-### ✅ Logros Principales
-- **Sistema completamente concurrente** usando goroutines y channels
-- **Gestión automática de prioridades** con contratación bajo demanda
-- **Mecanismos de sincronización** robustos y libres de race conditions
-- **Análisis comparativo exhaustivo** de diferentes configuraciones
-
-### 🚀 Aportaciones Técnicas
-- **Sistema de métricas integrado** para análisis de rendimiento
-- **Múltiples modos de operación** que cubren desde desarrollo hasta producción
-- **Tests automatizados** que validan tanto funcionalidad como rendimiento
 
 ---
 
